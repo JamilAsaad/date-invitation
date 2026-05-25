@@ -255,40 +255,72 @@
     setInterval(createHeart, 500);
 
     // ----------------------
-    // No Button Escape Logic
+    // No Button Escape Logic (Smart + Mobile + Avoid YES Button)
     // ----------------------
     const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
     const container = document.getElementById('buttonContainer');
 
-    function moveNoButton() {
+    let noScale = 1;
+
+    function moveNoButton(e) {
       const maxX = container.clientWidth - noBtn.offsetWidth;
       const maxY = container.clientHeight - noBtn.offsetHeight;
 
-      const randomX = Math.floor(Math.random() * maxX);
-      const randomY = Math.floor(Math.random() * maxY);
+      // random position base
+      let randomX = Math.floor(Math.random() * maxX);
+      let randomY = Math.floor(Math.random() * maxY);
+
+      // avoid YES button area
+      const yesRect = yesBtn.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      const yesX = yesRect.left - containerRect.left;
+      const yesY = yesRect.top - containerRect.top;
+
+      const distX = randomX - yesX;
+      const distY = randomY - yesY;
+      const distance = Math.sqrt(distX * distX + distY * distY);
+
+      // if too close to YES, push away
+      if (distance < 120) {
+        randomX += distX > 0 ? 120 : -120;
+        randomY += distY > 0 ? 120 : -120;
+      }
+
+      // clamp inside container
+      randomX = Math.max(0, Math.min(maxX, randomX));
+      randomY = Math.max(0, Math.min(maxY, randomY));
 
       noBtn.style.left = randomX + 'px';
       noBtn.style.top = randomY + 'px';
+
+      // shrink over time (escape pressure)
+      noScale -= 0.03;
+      if (noScale < 0.4) noScale = 0.4;
+      noBtn.style.transform = `scale(${noScale})`;
     }
 
     // desktop hover
     noBtn.addEventListener('mouseover', moveNoButton);
 
-    // mobile / touch support
+    // mobile touch
     noBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
-      moveNoButton();
+      moveNoButton(e);
     }, { passive: false });
 
-    // fallback for pointer devices (modern phones + tablets)
+    // modern pointer devices
     noBtn.addEventListener('pointerenter', moveNoButton);
 
-    noBtn.addEventListener('click', (e) => {
+    // also move away if actually clicked
+    noBtn.addEventListener('click', function(e) {
       e.preventDefault();
+      moveNoButton(e);
     });
 
     // ----------------------
-    // Page Navigation
+    // Page
     // ----------------------
     const yesBtn = document.getElementById('yesBtn');
     const page1 = document.getElementById('page1');
@@ -323,7 +355,7 @@
     const EMAILJS_PUBLIC_KEY = 'pHk91KThpSfJFAySl';
     const EMAILJS_SERVICE_ID = 'service_rq2z6r9';
     const EMAILJS_TEMPLATE_ID = 'template_2kc0ny6';
-    
+
     emailjs.init({
       publicKey: EMAILJS_PUBLIC_KEY,
     });
