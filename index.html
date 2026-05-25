@@ -260,7 +260,7 @@
     const noBtn = document.getElementById('noBtn');
     const container = document.getElementById('buttonContainer');
 
-    noBtn.addEventListener('mouseover', () => {
+    function moveNoButton() {
       const maxX = container.clientWidth - noBtn.offsetWidth;
       const maxY = container.clientHeight - noBtn.offsetHeight;
 
@@ -269,7 +269,19 @@
 
       noBtn.style.left = randomX + 'px';
       noBtn.style.top = randomY + 'px';
-    });
+    }
+
+    // desktop hover
+    noBtn.addEventListener('mouseover', moveNoButton);
+
+    // mobile / touch support
+    noBtn.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      moveNoButton();
+    }, { passive: false });
+
+    // fallback for pointer devices (modern phones + tablets)
+    noBtn.addEventListener('pointerenter', moveNoButton);
 
     noBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -311,7 +323,7 @@
     const EMAILJS_PUBLIC_KEY = 'pHk91KThpSfJFAySl';
     const EMAILJS_SERVICE_ID = 'service_rq2z6r9';
     const EMAILJS_TEMPLATE_ID = 'template_2kc0ny6';
-
+    
     emailjs.init({
       publicKey: EMAILJS_PUBLIC_KEY,
     });
